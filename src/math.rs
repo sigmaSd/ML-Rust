@@ -5,20 +5,6 @@ pub trait Math {
     fn minus_vec(&self, other: &[f64]) -> Vec<f64>;
 }
 
-impl Math for Vec<f64> {
-    fn dot(&self, other: &[f64]) -> f64 {
-        self.iter().zip(other).fold(0.0, |acc, (x, y)| acc + x * y)
-    }
-    fn mul_x(&self, other: f64) -> Vec<f64> {
-        self.iter().map(|v| v * other).collect()
-    }
-    fn mul_vec(&self, other: &[f64]) -> Vec<f64> {
-        self.iter().zip(other).map(|(a, b)| a * b).collect()
-    }
-    fn minus_vec(&self, other: &[f64]) -> Vec<f64> {
-        self.iter().zip(other).map(|(a, b)| a - b).collect()
-    }
-}
 impl Math for &[f64] {
     fn dot(&self, other: &[f64]) -> f64 {
         self.iter().zip(other).fold(0.0, |acc, (x, y)| acc + x * y)

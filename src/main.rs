@@ -1,8 +1,8 @@
 mod math;
 use math::{mse, Activfn, Math};
 
-const LEARNING_RATE: f64 = 0.1;
-const EPOCH: usize = 1000;
+const LEARNING_RATE: f64 = 0.01;
+const EPOCH: usize = 100_000;
 
 struct NeuralNet {
     n1: Neuron,
@@ -87,7 +87,7 @@ impl Neuron {
     fn feedforward(&mut self, inputs: &[f64]) -> f64 {
         self.input = Some(inputs.to_vec());
 
-        let result = self.weights.dot(inputs) + self.bias;
+        let result = self.weights.as_slice().dot(inputs) + self.bias;
 
         self.sum = Some(result);
         //dbg!(result);
@@ -98,7 +98,8 @@ impl Neuron {
     }
     fn backpropagate(&mut self, d_l_d_ypred: f64, out_weight: Option<f64>) -> Option<Neuron> {
         let d_ypred_d_b = Activfn::deriv_sigmoid(self.sum?);
-        let d_ypred_d_w: Vec<f64> = self.input.clone()?.mul_x(d_ypred_d_b);
+
+        let d_ypred_d_w: Vec<f64> = self.input.as_ref()?.as_slice().mul_x(d_ypred_d_b);
 
         let d_ypred_d_h = if let Some(out_weight) = out_weight {
             out_weight * d_ypred_d_b
@@ -106,10 +107,13 @@ impl Neuron {
             1.
         };
 
-        let weights = self.weights.minus_vec(
+        let weights = self.weights.as_slice().minus_vec(
             &d_ypred_d_w
+                .as_slice()
                 .mul_x(d_l_d_ypred)
+                .as_slice()
                 .mul_x(LEARNING_RATE)
+                .as_slice()
                 .mul_x(d_ypred_d_h),
         );
 
@@ -160,4 +164,10 @@ fn main() {
 
     let mut network = NeuralNet::new();
     network.train(data, all_y_trues);
+
+    // let emily = vec![-7., -3.];// # 128 pounds, 63 inches
+    // let frank = vec![20., 2.];
+
+    // dbg!(network.feedforward(&emily));
+    // dbg!(network.feedforward(&frank));
 }
