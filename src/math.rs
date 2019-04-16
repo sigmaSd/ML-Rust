@@ -23,18 +23,19 @@ impl Math for &mut [f64] {
     }
     fn mul_x(&mut self, other: f64) -> &mut [f64] {
         self.map_in_place(|v| *v * other);
+
         self
     }
     fn mul_vec(&mut self, other: &[f64]) -> &mut [f64] {
-        for i in 0..self.len() {
-            self[i] *= other[i];
-        }
+        let mut other = other.iter();
+        self.map_in_place(|v| v * other.next().unwrap());
+
         self
     }
     fn minus_vec(&mut self, other: &[f64]) -> &mut [f64] {
-        for i in 0..self.len() {
-            self[i] -= other[i];
-        }
+        let mut other = other.iter();
+        self.map_in_place(|v| v - other.next().unwrap());
+
         self
     }
 }
