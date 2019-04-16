@@ -115,6 +115,7 @@ impl Neuron {
 
         let weights = self
             .weights
+            .clone()
             .as_mut_slice()
             .minus_vec(
                 &d_ypred_d_w
@@ -123,7 +124,7 @@ impl Neuron {
                     .mul_x(LEARNING_RATE)
                     .mul_x(d_ypred_d_h),
             )
-            .to_vec();
+            .to_owned();
 
         let bias = self.bias - d_ypred_d_b * d_l_d_ypred * LEARNING_RATE * d_ypred_d_h;
 
