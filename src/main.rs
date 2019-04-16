@@ -87,7 +87,7 @@ impl Neuron {
     fn feedforward(&mut self, inputs: &[f64]) -> f64 {
         self.input = Some(inputs.to_vec());
 
-        let result = self.weights.as_slice().dot(inputs) + self.bias;
+        let result = self.weights.as_mut_slice().dot(inputs) + self.bias;
 
         self.sum = Some(result);
         //dbg!(result);
@@ -99,7 +99,13 @@ impl Neuron {
     fn backpropagate(&mut self, d_l_d_ypred: f64, out_weight: Option<f64>) -> Option<Neuron> {
         let d_ypred_d_b = Activfn::deriv_sigmoid(self.sum?);
 
-        let d_ypred_d_w: Vec<f64> = self.input.as_ref()?.as_slice().mul_x(d_ypred_d_b);
+        let mut d_ypred_d_w: Vec<f64> = self
+            .input
+            .as_ref()?
+            .clone()
+            .as_mut_slice()
+            .mul_x(d_ypred_d_b)
+            .to_owned();
 
         let d_ypred_d_h = if let Some(out_weight) = out_weight {
             out_weight * d_ypred_d_b
@@ -107,15 +113,17 @@ impl Neuron {
             1.
         };
 
-        let weights = self.weights.as_slice().minus_vec(
-            &d_ypred_d_w
-                .as_slice()
-                .mul_x(d_l_d_ypred)
-                .as_slice()
-                .mul_x(LEARNING_RATE)
-                .as_slice()
-                .mul_x(d_ypred_d_h),
-        );
+        let weights = self
+            .weights
+            .as_mut_slice()
+            .minus_vec(
+                &d_ypred_d_w
+                    .as_mut_slice()
+                    .mul_x(d_l_d_ypred)
+                    .mul_x(LEARNING_RATE)
+                    .mul_x(d_ypred_d_h),
+            )
+            .to_vec();
 
         let bias = self.bias - d_ypred_d_b * d_l_d_ypred * LEARNING_RATE * d_ypred_d_h;
 
